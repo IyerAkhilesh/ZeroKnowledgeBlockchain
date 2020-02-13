@@ -1,6 +1,7 @@
+import math
 import socket
 import pickle
-
+from BlockchainCode import SumProductSum as prng
 
 def mine_block(txn):
     from BlockchainCode import Blockchain
@@ -52,41 +53,50 @@ try:
     # Allows the reuse of socket address
     client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-    client_socket.bind(("127.0.0.1", 50200))
+    client_socket.bind(("127.0.0.1", 52500))
     client_socket.listen(50)
-    conn, addr = client_socket.accept()
-    print("Connection established by Node 1 - Power Raiser")
+    connection, address = client_socket.accept()
+    print("Connection established by Node 6 - Authenticator")
 
-    dump_var = conn.recv(1024)
-    exponent_string = pickle.loads(dump_var)
-    powers, exponents = [], []
-    transactions = []
-    if "," in exponent_string:
-        exponents = exponent_string.split(",")
-        transactions.append(exponents)
-        powers.append(pow(GENERATOR, int(exponents[0])))
-        powers.append(pow(GENERATOR, int(exponents[1])))
-        powers.append(pow(GENERATOR, int(exponents[2])))
-        transactions.append(powers)
-        dump_var_send = pickle.dumps(powers)
-        conn.send(dump_var_send)
-        conn.recv(512)
+    # the first power corresponding to the username: X
+    dump_var = connection.recv(1024)
+    X = pickle.loads(dump_var)
 
-        print("Transactions: ", transactions)
-        conn.send(bytes(str(mine_block(transactions)).encode()))
-        conn.recv(512)
+    import pymysql.cursors
 
-    else:
-        powers.append(pow(GENERATOR, int(exponent_string)))
-        transactions.append(exponents)
-        transactions.append(powers)
-        dump_var_send = pickle.dumps(powers)
-        conn.send(dump_var_send)
-        conn.recv(512)
+    conn = pymysql.connect(host="localhost",
+                           user="root",
+                           password="Akhilesh@1997",
+                           db="user_information",
+                           charset='utf8mb4',
+                           cursorclass=pymysql.cursors.DictCursor)
+    relevant_row = []
+    try:
+        with conn.cursor() as cursor:
+            # Create a new record
+            sql = "SELECT `blockdata` FROM `node6` `blockdata` WHERE `blockdata` like '{}'".format('%{0}%'.format(X[1:len(X)-1]))
+            print(sql)
+            cursor.execute(sql)
+            relevant_row = cursor.fetchall()
+        conn.commit()
+    finally:
+        conn.close()
+    print(relevant_row)
 
-        print("Transactions: ", transactions)
-        conn.send(bytes("Its a login!".encode()))
-        conn.recv(512)
+    Nb = math.floor(pow(5, math.e * 9 / 2)) % 100000000
+    Nb_factors = prng.factors(Nb)
+    nb1 = Nb_factors[math.floor(len(Nb_factors)/2) - 1]
+
+    # the first part of the challenge: nb1
+    dump_var = pickle.dumps(nb1)
+    connection.send(dump_var)
+
+    # the first part of the repsonse r1
+    dump_var = connection.recv(1024)
+    r1 = pickle.loads(dump_var)
+
+    connection.send(bytes("False".encode()))
+    ack = connection.recv(1024)
 
     client_socket.close()
 except ConnectionRefusedError as cr:

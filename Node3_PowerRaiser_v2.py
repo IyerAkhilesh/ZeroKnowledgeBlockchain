@@ -7,10 +7,10 @@ def mine_block(txn):
 
     bch = Blockchain.Blockchain()
     # Adding the block to a virtual blockchain
-    new_block = bch.add_block(txn, "node1")
+    new_block = bch.add_block(txn, "node3")
 
     # Validating it with other nodes and the network logic and appending it to the actual, if validated successfully
-    if bch.validate_block("node1"):
+    if bch.validate_block("node3"):
         new_block_data = [
             new_block.hash,
             "0",
@@ -22,7 +22,7 @@ def mine_block(txn):
         ]
 
         new_blockname = new_block.block_identifier(new_block.transactions)
-        # Access and insert the newest block in the database "user_information" and table node1
+        # Access and insert the newest block in the database "user_information" and table node3
         import pymysql.cursors
         conn = pymysql.connect(host="localhost",
                                user="root",
@@ -33,16 +33,16 @@ def mine_block(txn):
         try:
             with conn.cursor() as cursor:
                 # Create a new record
-                sql = "INSERT INTO `node1` (`blockname`, `blockdata`) VALUES (%s, %s)"
+                sql = "INSERT INTO `node3` (`blockname`, `blockdata`) VALUES (%s, %s)"
                 cursor.execute(sql, (str(new_blockname), str(new_block_data)))
             conn.commit()
         finally:
             conn.close()
-        return True
+
     else:
         # Print an error message
         print("CANNOT MINE BLOCK!")
-        return False
+        return
 
 
 GENERATOR = 3
@@ -52,10 +52,10 @@ try:
     # Allows the reuse of socket address
     client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-    client_socket.bind(("127.0.0.1", 50200))
+    client_socket.bind(("127.0.0.1", 51000))
     client_socket.listen(50)
     conn, addr = client_socket.accept()
-    print("Connection established by Node 1 - Power Raiser")
+    print("Connection established by Node 3 - Power Raiser")
 
     dump_var = conn.recv(1024)
     exponent_string = pickle.loads(dump_var)
