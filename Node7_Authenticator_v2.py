@@ -56,15 +56,15 @@ try:
     # Allows the reuse of socket address
     client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-    client_socket.bind(("127.0.0.1", 52500))
+    client_socket.bind(("127.0.0.1", 53000))
     client_socket.listen(50)
     connection, address = client_socket.accept()
-    print("Connection established by Node 6 - Authenticator")
+    print("Connection established by Node 7 - Authenticator")
 
     # the first power corresponding to the username: X
     dump_var = connection.recv(1024)
-    X = pickle.loads(dump_var)
-    X = X[1:len(X)-1]
+    Y = pickle.loads(dump_var)
+    Y = Y[1:len(Y)-1]
 
     import pymysql.cursors
 
@@ -78,7 +78,7 @@ try:
     try:
         with conn.cursor() as cursor:
             # Create a new record
-            sql = "SELECT `blockdata` FROM `node6` `blockdata` WHERE `blockdata` like '{}'".format('%{0}%'.format(X))
+            sql = "SELECT `blockdata` FROM `node7` `blockdata` WHERE `blockdata` like '{}'".format('%{0}%'.format(Y))
             print(sql)
             cursor.execute(sql)
             relevant_row = cursor.fetchall()
@@ -92,15 +92,15 @@ try:
 
     Nb = math.floor(pow(5, math.e * 9 / 2)) % 100000000
     Nb_factors = prng.factors(Nb)
-    nb1 = Nb_factors[math.floor(len(Nb_factors)/2) - 1]
+    nb2 = Nb_factors[math.floor(len(Nb_factors)/2)]
 
     # the first part of the challenge: nb1
-    dump_var = pickle.dumps(nb1)
+    dump_var = pickle.dumps(nb2)
     connection.send(dump_var)
 
     # the first part of the repsonse r1
     dump_var = connection.recv(1024)
-    r1 = pickle.loads(dump_var)
+    r2 = pickle.loads(dump_var)
 
 
     def power(base, exponent):
@@ -110,9 +110,9 @@ try:
         return str(raised)
 
     # the first part of the result left_result
-    left_result = power(GENERATOR, r1) == str(long(X) * long(power(retrieved_pass_number, nb1)))
-    print(power(GENERATOR, r1))
-    print(str(long(X) * long(power(retrieved_pass_number, nb1))))
+    left_result = power(GENERATOR, r2) == str(long(Y) * long(power(retrieved_pass_number, nb2)))
+    print(power(GENERATOR, r2))
+    print(str(long(Y) * long(power(retrieved_pass_number, nb2))))
     print(left_result)
     connection.send(bytes(str(left_result).encode()))
 

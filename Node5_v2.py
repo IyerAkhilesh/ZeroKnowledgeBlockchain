@@ -146,7 +146,16 @@ class Node5:
         Y = self.send_to_container(container2, str(exponents[1]))
         print("Powers returned by container servers: ", X, Y)
 
+        # send first power, response one process from
+        # pass_number and first user number to authenticator one and get back result one
         R_ONE = self.send_to_authenticator(authenticator1, X, exponents[2], exponents[0])
+
+        # send second power, response one process from
+        # pass_number and second user number to authenticator two and get back result two
+        R_TWO = self.send_to_authenticator(authenticator2, Y, exponents[2], exponents[1])
+        print("Results returned by authentication servers: ", R_ONE, R_TWO)
+
+        return R_ONE & R_TWO
 
     def send_to_authenticator(self,container_id, power, exponent1, exponent2):
         import socket
@@ -160,15 +169,15 @@ class Node5:
             self.transactions.append(self.block_table + "->" + container_id + "->" + str(power))
             sender_socket.send(dump_var)
 
-            # what is received is challenge nb1
+            # what is received is challenge nb
             dump_var = sender_socket.recv(1024)
-            nb1 = pickle.loads(dump_var)
-            print("Challenge: ", nb1)
+            nb = pickle.loads(dump_var)
+            print("Challenge: ", nb)
 
-            # what is calculated is response r1
-            r1 = int(nb1) * exponent1 + exponent2
-            print("Response: ", r1)
-            dump_var = pickle.dumps(r1)
+            # what is calculated is response r
+            r = int(nb) * exponent1 + exponent2
+            print("Response: ", r)
+            dump_var = pickle.dumps(r)
             sender_socket.send(dump_var)
 
             transaction_result = sender_socket.recv(1024)
@@ -179,7 +188,7 @@ class Node5:
             print(self.transactions)
 
             if "True" in str(transaction_result.decode()):
-                print("Hello there! Your chances of logging in successfully are 50% now!")
+                print("Hello there! Your chances of logging in successfully are 50% more now!")
                 return True
             else:
                 print("I am sorry! You can't login now!")
@@ -243,8 +252,11 @@ try:
             # print("Registration status: ",registered_flag)
 
             # Login
-            n1.login("node1", "node3", "", "", "node6", "")
-
+            login_result = n1.login("node1", "node3", "", "", "node6", "node7")
+            if login_result:
+                print("Whoa! You made it! Welcome to Zero Knowledge Blockchain!")
+            else:
+                print("I am sorry! Nobody wants you in! Try registering the next time! ;-)")
     conn.commit()
 finally:
     conn.close()
