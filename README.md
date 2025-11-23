@@ -1,6 +1,9 @@
 # ZeroKnowledgeBlockchain
 Using Zero Knowledge Proof algorithms for authentication in services that run on blockchain
 
+Data Flow Diagram - 
+<img width="1199" height="752" alt="ZKB v1" src="https://github.com/user-attachments/assets/e0a4d909-63e0-4503-90d0-c3726f8ea0de" />
+
 Steps to run the code:
   1. Open MYSQL Workbench 8.0 or higher, connect as root user with the password given in the code and see that there tables with the names      node1, node2, ... , node7
   2. Run all the verifiers one after the other: Node1_verifier_v2, Node2_verifier_v2, ... , Node7_verifier_v2
